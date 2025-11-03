@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo Giá Làm Website — Cypher</title>
+  <style>
+    :root {
+      --nano-black: #0a0a0a;
+      --text-light: #f5f5f5;
+      --accent: #00ffff;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s ease;
+    }
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(120deg, #000000, #1a1a1a, #000000);
+      background-size: 400% 400%;
+      color: var(--text-light);
+      animation: rgbFlow 12s infinite alternate;
+    }
+    @keyframes rgbFlow {
+      0% { background: linear-gradient(120deg, #000000, #1a0033, #001a33); }
+      50% { background: linear-gradient(120deg, #000000, #33001a, #00331a); }
+      100% { background: linear-gradient(120deg, #000000, #001a33, #1a0033); }
+    }
+    .container {
+      display: flex;
+      gap: 40px;
+      background: rgba(20, 20, 20, 0.9);
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      width: 90%;
+      max-width: 1100px;
+      flex-wrap: wrap;
+    }
+    .column {
+      flex: 1;
+      min-width: 320px;
+    }
+    h1 {
+      text-align: center;
+      color: var(--accent);
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      color: #000;
+      background: #fff;
+    }
+    input[readonly] {
+      background: #f3f3f3;
+      color: #777;
+    }
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(90deg, #00ffff, #0088ff);
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1.1em;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #00ffaa, #00ffff);
+      transform: scale(1.02);
+    }
+    .result, .payment {
+      margin-top: 20px;
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .copyable {
+      cursor: pointer;
+      color: #00ffff;
+      user-select: none;
+    }
+    .copyable:hover { text-decoration: underline; }
+    img.qr {
+      width: 200px;
+      display: block;
+      margin: 10px auto;
+    }
+    .demo-link {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .demo-link a {
+      color: #00ffff;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .benefits ul {
+      list-style: "✅ ";
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="column">
+      <h1>BÁO GIÁ WEBSITE</h1>
+      <label>Tên miền:</label>
+      <input type="text" id="domainName" placeholder="Nhập tên miền (vd: cypher234)" />
+
+      <label>Chọn đuôi miền:</label>
+      <select id="domainType">
+        <option value=".com" data-price="250000">.com - 250.000đ/năm</option>
+        <option value=".vn" data-price="480000">.vn - 480.000đ/năm</option>
+        <option value=".net" data-price="260000">.net - 260.000đ/năm</option>
+        <option value=".shop" data-price="75000">.shop - 75.000đ/năm</option>
+      </select>
+
+      <label>Gói hosting:</label>
+      <select id="hosting">
+        <option value="8000">Gói 1 - 8.000đ/tháng</option>
+        <option value="16000">Gói 2 - 16.000đ/tháng</option>
+        <option value="24000">Gói 2 - 24.000đ/tháng</option>
+        <option value="32000">Gói 3 - 32.000đ/tháng</option>
+      </select>
+
+      <label>
+        <input type="checkbox" id="api" /> Thêm dịch vụ API Auto Bank (35.000đ/tháng)
+      </label>
+
+      <label>Tiền công thiết kế (cố định):</label>
+      <input type="text" value="300.000đ" readonly />
+
+      <button id="calcBtn">Tính Tổng Tiền</button>
+      <div class="result" id="resultBox"></div>
+      <button id="payBtn" style="display:none;">Thanh Toán</button>
+    </div>a
+
+    <div class="column">
+      <h1>PHƯƠNG THỨC THANH TOÁN</h1>
+      <p>💬 Hãy chọn đầy đủ thông tin website của bạn, sau đó <b>chuyển khoản</b> theo hướng dẫn dưới đây và gửi bill cho admin để nhận web.</p>
+      <p>Ngân hàng: <span class="copyable" onclick="copyText('Techcombank')">Techcombank</span></p>
+      <p>Chủ tài khoản: <span class="copyable" onclick="copyText('LÊ VĂN LINH')">LÊ VĂN LINH</span></p>
+      <p>Số tài khoản: <span class="copyable" onclick="copyText('19073015796012')">19073015796012</span></p>
+      <img id="qrImage" class="qr" src="" alt="QR Thanh Toán" style="display:none;"/>
+      
+      <div class="demo-link">
+        🌐 <a href="https://cypher234.shop" target="_blank">Demo Website: Cypher234.shop</a>
+      </div>
+
+      <div class="benefits">
+        <h3>✨ Ưu điểm của website:</h3>
+        <ul>
+          <li>Login nhanh bằng Google</li>
+          <li>Tự động đối soát qua API Auto Bank</li>
+          <li>QR thanh toán tức thì</li>
+          <li>Chuẩn SEO và hiển thị đẹp trên mobile</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const calcBtn = document.getElementById('calcBtn');
+    const payBtn = document.getElementById('payBtn');
+    const resultBox = document.getElementById('resultBox');
+    const qrImage = document.getElementById('qrImage');
+
+    calcBtn.addEventListener('click', () => {
+      const name = document.getElementById('domainName').value.trim();
+      const domainType = document.getElementById('domainType');
+      const host = document.getElementById('hosting');
+      const api = document.getElementById('api').checked;
+      
+      if (!name) return alert("Vui lòng nhập tên miền!");
+      const domainPrice = +domainType.selectedOptions[0].dataset.price;
+      const hostPrice = +host.value;
+      const apiPrice = api ? 35000 : 0;
+      const total = 300000 + domainPrice + hostPrice + apiPrice;
+      
+      const fullDomain = name + domainType.value;
+      resultBox.innerHTML = `
+        <p><b>Tên miền:</b> ${fullDomain}</p>
+        <p><b>Tổng tiền tháng đầu:</b> ${total.toLocaleString()}đ</p>
+        <p>${api ? "✔ Có sử dụng API Auto Bank" : "✖ Không sử dụng API Auto Bank"}</p>
+      `;
+      payBtn.style.display = "block";
+
+      payBtn.onclick = () => {
+        const qrUrl = `https://img.vietqr.io/image/Techcombank-19073015796012-compact2.png?amount=${total}&addInfo=ThanhToan+${fullDomain}`;
+        qrImage.src = qrUrl;
+        qrImage.style.display = "block";
+      };
+    });
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt);
+      alert("Đã sao chép: " + txt);
+    }
+  </script>
+</body>
+</html>
