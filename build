@@ -1,220 +1,400 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Báo Giá Làm Website — Cypher</title>
-  <style>
-    :root {
-      --nano-black: #0a0a0a;
-      --text-light: #f5f5f5;
-      --accent: #00ffff;
-    }
-    * {
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-      transition: all 0.3s ease;
-    }
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(120deg, #000000, #1a1a1a, #000000);
-      background-size: 400% 400%;
-      color: var(--text-light);
-      animation: rgbFlow 12s infinite alternate;
-    }
-    @keyframes rgbFlow {
-      0% { background: linear-gradient(120deg, #000000, #1a0033, #001a33); }
-      50% { background: linear-gradient(120deg, #000000, #33001a, #00331a); }
-      100% { background: linear-gradient(120deg, #000000, #001a33, #1a0033); }
-    }
-    .container {
-      display: flex;
-      gap: 40px;
-      background: rgba(20, 20, 20, 0.9);
-      padding: 40px;
-      border-radius: 24px;
-      box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
-      border: 1px solid rgba(0, 255, 255, 0.3);
-      width: 90%;
-      max-width: 1100px;
-      flex-wrap: wrap;
-    }
-    .column {
-      flex: 1;
-      min-width: 320px;
-    }
-    h1 {
-      text-align: center;
-      color: var(--accent);
-      font-size: 2em;
-      margin-bottom: 10px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: 500;
-    }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-      color: #000;
-      background: #fff;
-    }
-    input[readonly] {
-      background: #f3f3f3;
-      color: #777;
-    }
-    button {
-      width: 100%;
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(90deg, #00ffff, #0088ff);
-      color: #000;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 1.1em;
-    }
-    button:hover {
-      background: linear-gradient(90deg, #00ffaa, #00ffff);
-      transform: scale(1.02);
-    }
-    .result, .payment {
-      margin-top: 20px;
-      background: rgba(255,255,255,0.05);
-      padding: 15px;
-      border-radius: 10px;
-    }
-    .copyable {
-      cursor: pointer;
-      color: #00ffff;
-      user-select: none;
-    }
-    .copyable:hover { text-decoration: underline; }
-    img.qr {
-      width: 200px;
-      display: block;
-      margin: 10px auto;
-    }
-    .demo-link {
-      text-align: center;
-      margin-top: 10px;
-    }
-    .demo-link a {
-      color: #00ffff;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    .benefits ul {
-      list-style: "✅ ";
-      padding-left: 20px;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Báo Giá Cypher234 — Nano RGB</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-black: #030407;
+    --card: rgba(12,14,18,0.86);
+    --muted: #9fb0c2;
+    --text: #e8f6fb;
+    --cyan: #00d0ff;
+    --purple: #7c4dff;
+    --success: #4be27a;
+    --danger: #ff6b6b;
+  }
+
+  *{box-sizing:border-box;font-family:'Poppins',sans-serif}
+  html,body{height:100%;margin:0;background:var(--bg-black);color:var(--text);-webkit-font-smoothing:antialiased}
+
+  /* Full-screen wrapper */
+  .page {
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* soft RGB moving background (nano feel) */
+  .rgb-bg {
+    position:fixed;inset:0;z-index:0;background:
+      radial-gradient(ellipse at 10% 20%, rgba(124,77,255,0.06) 0%, transparent 18%),
+      radial-gradient(ellipse at 85% 80%, rgba(0,208,255,0.05) 0%, transparent 18%),
+      linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.9));
+    background-size: 400% 400%;
+    animation: rgbFlow 12s linear infinite;
+    filter: blur(24px) saturate(120%);
+    pointer-events:none;
+  }
+  @keyframes rgbFlow{
+    0% {background-position:0% 50%;}
+    50% {background-position:100% 50%;}
+    100% {background-position:0% 50%;}
+  }
+
+  /* subtle vertical neon bars on edges */
+  .edge-left, .edge-right {
+    position:fixed;top:0;height:100%;width:8px;z-index:0;pointer-events:none;
+    background:linear-gradient(180deg,#ff3d6e,#ff8a00,#ffd300,#00ffb0,#00d0ff,#7a00ff);
+    background-size:300% 300%;animation:rgbFlow 12s linear infinite;opacity:0.45;filter:blur(6px);
+  }
+  .edge-left{left:0} .edge-right{right:0}
+
+  /* main container */
+  .container{
+    position:relative;z-index:2;width:100%;max-width:1200px;display:grid;
+    grid-template-columns: 1fr 420px; gap:28px;
+    align-items:start;padding:28px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03);box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    overflow:visible;
+  }
+
+  @media(max-width:980px){
+    .container{grid-template-columns:1fr;padding:18px}
+  }
+
+  /* card / form styles */
+  .card{background:var(--card);padding:20px;border-radius:12px;overflow:hidden}
+  header {display:flex;gap:12px;align-items:center;margin-bottom:6px}
+  .logo {width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;color:#041225;box-shadow:0 10px 40px rgba(0,208,255,0.06)}
+  h1{margin:0;color:var(--cyan);font-size:20px}
+  p.lead{color:var(--muted);margin:4px 0 12px}
+
+  label{display:block;color:var(--muted);font-weight:700;margin-top:10px}
+  input[type="text"], select {width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:#fff;color:#000;font-weight:700}
+  input[readonly]{background:linear-gradient(180deg,#f6f8fb,#eef3f8);color:#222;cursor:default}
+
+  .row{display:flex;gap:10px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:800}
+  .btn-primary{background:linear-gradient(90deg,var(--cyan),#0072ff);color:#022}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
+
+  .small{font-size:13px;color:var(--muted);margin-top:8px}
+
+  .break{margin-top:14px;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+  .flex-between{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+  .total{margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(90deg,#041422,#002b3a);font-weight:800;text-align:center;color:var(--text);border:1px solid rgba(0,208,255,0.05)}
+
+  /* right side QR + bank */
+  .qr{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .qr img{width:200px;border-radius:12px;border:8px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.6)}
+  .info-row{margin-top:12px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02)}
+  .bank-row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;cursor:pointer}
+  .bank-row:hover{background:linear-gradient(90deg, rgba(0,208,255,0.02), rgba(124,77,255,0.02))}
+  .copied{animation:copiedAnim .9s ease}
+  @keyframes copiedAnim{0%{transform:translateY(0);opacity:1}50%{transform:translateY(-6px);opacity:0.95}100%{transform:translateY(0);opacity:1}}
+
+  .demo{margin-top:16px;padding:12px;border-radius:8px;text-align:center;background:linear-gradient(90deg, rgba(124,77,255,0.04), rgba(0,208,255,0.03));border:1px solid rgba(255,255,255,0.02)}
+  .demo a{color:var(--cyan);font-weight:800;text-decoration:none}
+  .api-info{font-size:0.95rem;color:#cfe9fb;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;margin-top:10px}
+
+  .toast{position:fixed;right:22px;bottom:22px;padding:10px 14px;border-radius:10px;background:#061016;color:var(--text);box-shadow:0 12px 40px rgba(0,0,0,0.6);display:none;z-index:9999}
+  .toast.show{display:block;animation:toastIn .25s ease}
+  @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="column">
-      <h1>BÁO GIÁ WEBSITE</h1>
-      <label>Tên miền:</label>
-      <input type="text" id="domainName" placeholder="Nhập tên miền (vd: cypher234)" />
+  <div class="rgb-bg" aria-hidden="true"></div>
+  <div class="edge-left" aria-hidden="true"></div>
+  <div class="edge-right" aria-hidden="true"></div>
 
-      <label>Chọn đuôi miền:</label>
-      <select id="domainType">
-        <option value=".com" data-price="250000">.com - 250.000đ/năm</option>
-        <option value=".vn" data-price="480000">.vn - 480.000đ/năm</option>
-        <option value=".net" data-price="260000">.net - 260.000đ/năm</option>
-        <option value=".shop" data-price="75000">.shop - 75.000đ/năm</option>
-      </select>
+  <main class="page" role="main">
+    <div class="container" role="application" aria-label="Báo giá dịch vụCypher">
+      <!-- LEFT: Form -->
+      <section class="card" aria-labelledby="quoteTitle">
+        <header>
+          <div class="logo">C</div>
+          <div>
+            <h1 id="quoteTitle">Báo Giá Cypher234</h1>
+            <p class="lead">Nhanh — Chuẩn — GenZ. Điền thông tin, tính tổng, nhận QR để thanh toán.</p>
+          </div>
+        </header>
 
-      <label>Gói hosting:</label>
-      <select id="hosting">
-        <option value="8000">Gói 1 - 8.000đ/tháng</option>
-        <option value="16000">Gói 2 - 16.000đ/tháng</option>
-        <option value="24000">Gói 2 - 24.000đ/tháng</option>
-        <option value="32000">Gói 3 - 32.000đ/tháng</option>
-      </select>
+        <div class="small" style="margin-bottom:8px">Tiền công (không sửa được):</div>
+        <label>Tiền công thiết kế</label>
+        <input id="designFee" type="text" value="300.000 đ" readonly aria-readonly="true">
 
-      <label>
-        <input type="checkbox" id="api" /> Thêm dịch vụ API Auto Bank (35.000đ/tháng)
-      </label>
+        <label>Tên miền (phần trước)</label>
+        <input id="domainInput" type="text" placeholder="ví dụ: cypher234" aria-label="Phần trước tên miền">
 
-      <label>Tiền công thiết kế (cố định):</label>
-      <input type="text" value="300.000đ" readonly />
+        <label>Chọn đuôi miền</label>
+        <select id="tldSelect" aria-label="Chọn đuôi miền">
+          <!-- options filled by JS -->
+        </select>
 
-      <button id="calcBtn">Tính Tổng Tiền</button>
-      <div class="result" id="resultBox"></div>
-      <button id="payBtn" style="display:none;">Thanh Toán</button>
-    </div>a
+        <label>Chọn gói Hosting</label>
+        <select id="hostingSelect" aria-label="Chọn gói hosting">
+          <!-- options filled by JS -->
+        </select>
 
-    <div class="column">
-      <h1>PHƯƠNG THỨC THANH TOÁN</h1>
-      <p>💬 Hãy chọn đầy đủ thông tin website của bạn, sau đó <b>chuyển khoản</b> theo hướng dẫn dưới đây và gửi bill cho admin để nhận web.</p>
-      <p>Ngân hàng: <span class="copyable" onclick="copyText('Techcombank')">Techcombank</span></p>
-      <p>Chủ tài khoản: <span class="copyable" onclick="copyText('LÊ VĂN LINH')">LÊ VĂN LINH</span></p>
-      <p>Số tài khoản: <span class="copyable" onclick="copyText('19073015796012')">19073015796012</span></p>
-      <img id="qrImage" class="qr" src="" alt="QR Thanh Toán" style="display:none;"/>
-      
-      <div class="demo-link">
-        🌐 <a href="https://cypher234.shop" target="_blank">Demo Website: Cypher234.shop</a>
-      </div>
+        <label style="margin-top:10px"><input id="apiChk" type="checkbox"> Dịch vụ API Auto Bank — 35.000 đ / tháng (tùy chọn)</label>
 
-      <div class="benefits">
-        <h3>✨ Ưu điểm của website:</h3>
-        <ul>
-          <li>Login nhanh bằng Google</li>
-          <li>Tự động đối soát qua API Auto Bank</li>
-          <li>QR thanh toán tức thì</li>
-          <li>Chuẩn SEO và hiển thị đẹp trên mobile</li>
-        </ul>
-      </div>
+        <div class="api-info" aria-hidden="false">
+          <b>API Auto Bank (35k/tháng)</b><br>
+          API giúp <strong>tự động đối soát</strong> giao dịch: khi khách chuyển khoản, hệ thống tự ghi nhận - xác nhận đơn hàng, tiết kiệm công admin, phản hồi nhanh đến khách.
+        </div>
+
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <button id="calcBtn" class="btn btn-primary" aria-label="Tính tổng">🧾 Tính Tổng</button>
+          <button id="checkBtn" class="btn btn-ghost" aria-label="Kiểm tra miền">🔎 Kiểm Tra Miền</button>
+        </div>
+
+        <div id="breakdown" class="break" style="display:none" aria-live="polite">
+          <div class="flex-between"><div>Tiền công (1 lần)</div><div>300.000 đ</div></div>
+          <div class="flex-between"><div>Tên miền (1 năm)</div><div id="br-domain">—</div></div>
+          <div class="flex-between"><div>Hosting (1 tháng)</div><div id="br-host">—</div></div>
+          <div class="flex-between" id="br-api-row" style="display:none"><div>API Auto Bank (1 tháng)</div><div id="br-api">—</div></div>
+          <div class="flex-between"><div>Tên miền đầy đủ</div><div id="br-full-domain">—</div></div>
+          <div class="total" id="br-total">—</div>
+        </div>
+
+        <p class="small" style="margin-top:10px">Lưu ý: Tổng hiển thị là <strong>tháng đầu</strong> (bao gồm tiền công 300.000đ + domain 1 năm + hosting 1 tháng + api 1 tháng nếu chọn).</p>
+
+      </section>
+
+      <!-- RIGHT: Payment & Demo -->
+      <aside class="card" aria-labelledby="payTitle">
+        <h1 id="payTitle" style="text-align:center;color:var(--cyan)">Phương Thức Thanh Toán</h1>
+        <p class="small" style="text-align:center">Chọn đầy đủ thông tin ở bên trái → Tính tổng → bấm "Thanh Toán (Sinh QR)" để nhận mã QR có số tiền tương ứng.</p>
+
+        <div class="qr" id="qrBox" aria-live="polite" style="margin-top:6px">
+          <img id="qrImg" src="" alt="QR VietQR" style="display:none" />
+        </div>
+
+        <div class="info-row" role="region" aria-label="Thông tin ngân hàng">
+          <div class="bank-row copy-target" data-copy="Techcombank"><div style="color:var(--muted)">Ngân hàng</div><div style="font-weight:800">Techcombank</div></div>
+          <div class="bank-row copy-target" data-copy="19073015796012"><div style="color:var(--muted)">Số tài khoản</div><div style="font-weight:800">19073015796012</div></div>
+          <div class="bank-row copy-target" data-copy="LÊ VĂN LINH"><div style="color:var(--muted)">Chủ tài khoản</div><div style="font-weight:800">LÊ VĂN LINH</div></div>
+          <div class="small" style="margin-top:8px;text-align:center">Nhấn để sao chép thông tin. Sau khi chuyển khoản, gửi bill qua Zalo/Email để admin xác thực và nhận website.</div>
+        </div>
+
+        <div class="demo" style="margin-top:14px">
+          <div style="font-weight:800;color:var(--cyan)">🌐 Website Demo</div>
+          <div style="margin-top:8px"><a href="https://cypher234.shop" target="_blank" rel="noopener" style="color:var(--cyan)">https://cypher234.shop</a></div>
+        </div>
+
+        <div style="margin-top:14px">
+          <h3 style="color:var(--muted)">Chức năng chính</h3>
+          <ul style="color:var(--muted)">
+            <li>Login Google (Firebase-ready)</li>
+            <li>Auto Bank (tự đối soát) — tuỳ chọn</li>
+            <li>QR thanh toán sinh tự động</li>
+            <li>Responsive & tối ưu SEO cơ bản</li>
+          </ul>
+        </div>
+      </aside>
     </div>
-  </div>
+  </main>
 
-  <script>
-    const calcBtn = document.getElementById('calcBtn');
-    const payBtn = document.getElementById('payBtn');
-    const resultBox = document.getElementById('resultBox');
-    const qrImage = document.getElementById('qrImage');
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    calcBtn.addEventListener('click', () => {
-      const name = document.getElementById('domainName').value.trim();
-      const domainType = document.getElementById('domainType');
-      const host = document.getElementById('hosting');
-      const api = document.getElementById('api').checked;
-      
-      if (!name) return alert("Vui lòng nhập tên miền!");
-      const domainPrice = +domainType.selectedOptions[0].dataset.price;
-      const hostPrice = +host.value;
-      const apiPrice = api ? 35000 : 0;
-      const total = 300000 + domainPrice + hostPrice + apiPrice;
-      
-      const fullDomain = name + domainType.value;
-      resultBox.innerHTML = `
-        <p><b>Tên miền:</b> ${fullDomain}</p>
-        <p><b>Tổng tiền tháng đầu:</b> ${total.toLocaleString()}đ</p>
-        <p>${api ? "✔ Có sử dụng API Auto Bank" : "✖ Không sử dụng API Auto Bank"}</p>
-      `;
-      payBtn.style.display = "block";
+<script>
+/* =====================
+   PRICES - chỉnh ở đây nếu cần
+   ===================== */
+const PRICES = {
+  domains: {
+    ".com": 250000,
+    ".vn": 450000,
+    ".shop": 75000,
+    ".net": 350000
+  },
+  hosting: [
+    { id:'AN1', label:'AN1 — 8.000đ / tháng', price:8000 },
+    { id:'AN2', label:'AN2 — 16.000đ / tháng', price:16000 },
+    { id:'AN3', label:'AN3 — 24.000đ / tháng', price:24000 },
+    { id:'AN4', label:'AN4 — 32.000đ / tháng', price:32000 }
+  ],
+  apiPrice: 35000,
+  designFee: 300000,
+  bank: {
+    name: 'Techcombank',
+    account: '19073015796012',
+    holder: 'LÊ VĂN LINH'
+  }
+};
 
-      payBtn.onclick = () => {
-        const qrUrl = `https://img.vietqr.io/image/Techcombank-19073015796012-compact2.png?amount=${total}&addInfo=ThanhToan+${fullDomain}`;
-        qrImage.src = qrUrl;
-        qrImage.style.display = "block";
-      };
+/* =====================
+   DOM refs
+   ===================== */
+const tldSelect = document.getElementById('tldSelect');
+const hostingSelect = document.getElementById('hostingSelect');
+const calcBtn = document.getElementById('calcBtn');
+const checkBtn = document.getElementById('checkBtn');
+const apiChk = document.getElementById('apiChk');
+const domainInput = document.getElementById('domainInput');
+
+const breakdown = document.getElementById('breakdown');
+const brDomain = document.getElementById('br-domain');
+const brHost = document.getElementById('br-host');
+const brApiRow = document.getElementById('br-api-row');
+const brApi = document.getElementById('br-api');
+const brFullDomain = document.getElementById('br-full-domain');
+const brTotal = document.getElementById('br-total');
+
+const qrImg = document.getElementById('qrImg');
+const toast = document.getElementById('toast');
+
+/* ========== init selects ========== */
+function init() {
+  // fill domain options
+  Object.entries(PRICES.domains).forEach(([tld, price])=>{
+    const opt = document.createElement('option');
+    opt.value = tld;
+    opt.dataset.price = price;
+    opt.textContent = `${tld} — ${price.toLocaleString()} đ / năm`;
+    tldSelect.appendChild(opt);
+  });
+  // fill hosting
+  PRICES.hosting.forEach(h=>{
+    const opt = document.createElement('option');
+    opt.value = h.price;
+    opt.textContent = `${h.label}`;
+    hostingSelect.appendChild(opt);
+  });
+
+  // set design fee displayed (readonly already)
+  const designFeeInput = document.getElementById('designFee');
+  designFeeInput.value = PRICES.designFee.toLocaleString() + ' đ';
+}
+init();
+
+/* ========== toast ========== */
+function showToast(msg, ok=true){
+  toast.textContent = msg;
+  toast.style.background = ok ? '#071617' : '#3a1414';
+  toast.classList.add('show');
+  toast.style.display = 'block';
+  clearTimeout(window._t);
+  window._t = setTimeout(()=>{ toast.classList.remove('show'); toast.style.display='none'; }, 2200);
+}
+
+/* ========== copy bank fields ========== */
+document.querySelectorAll('.copy-target').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const text = el.getAttribute('data-copy');
+    navigator.clipboard.writeText(text).then(()=>{
+      el.classList.add('copied');
+      setTimeout(()=>el.classList.remove('copied'),700);
+      showToast('✅ Đã copy: ' + text);
+    }).catch(err=>{
+      console.error('copy fail', err);
+      showToast('❌ Không copy được', false);
     });
+  });
+});
 
-    function copyText(txt) {
-      navigator.clipboard.writeText(txt);
-      alert("Đã sao chép: " + txt);
+/* ========== calculate ========== */
+calcBtn.addEventListener('click', ()=>{
+  const name = (domainInput.value || '').trim();
+  if(!name){ showToast('⚠️ Vui lòng nhập phần trước tên miền', false); return; }
+
+  const tldOption = tldSelect.options[tldSelect.selectedIndex];
+  const tld = tldOption.value;
+  const tldPrice = parseInt(tldOption.dataset.price || 0);
+
+  const hostingPrice = parseInt(hostingSelect.value || 0);
+  const apiPrice = apiChk.checked ? PRICES.apiPrice : 0;
+
+  const total = PRICES.designFee + tldPrice + hostingPrice + apiPrice;
+
+  // show breakdown
+  breakdown.style.display = 'block';
+  brDomain.textContent = `${tld} — ${tldPrice.toLocaleString()} đ`;
+  brHost.textContent = hostingPrice.toLocaleString() + ' đ';
+  if(apiPrice){
+    brApiRow.style.display = 'flex';
+    brApi.textContent = apiPrice.toLocaleString() + ' đ';
+  } else {
+    brApiRow.style.display = 'none';
+  }
+  brFullDomain.textContent = `${name}${tld}`;
+  brTotal.textContent = `Tổng tháng đầu: ${total.toLocaleString()} đ`;
+
+  // create/update pay button
+  createOrUpdatePayButton(total, `${name}${tld}`);
+});
+
+/* ========== create/update pay button ========== */
+function createOrUpdatePayButton(amount, fullDomain){
+  // if button exists remove to replace (so handler updates)
+  let existing = document.getElementById('payNowBtn');
+  if(existing) existing.remove();
+
+  const btn = document.createElement('button');
+  btn.id = 'payNowBtn';
+  btn.className = 'btn btn-primary';
+  btn.textContent = 'Thanh Toán (Sinh QR)';
+  btn.style.marginTop = '12px';
+  // place after breakdown
+  breakdown.insertAdjacentElement('afterend', btn);
+  btn.addEventListener('click', ()=> generateQR(amount, fullDomain));
+  showToast('🔔 Đã tính xong — bấm "Thanh Toán (Sinh QR)" để tạo mã.');
+}
+
+/* ========== generate QR ==========
+   Using img.vietqr.io pattern (public).
+   We encode addInfo to include domain and note.
+==================================*/
+function generateQR(amount, fullDomain){
+  const account = PRICES.bank.account;
+  const amt = Math.round(amount);
+  const addInfo = encodeURIComponent(`ThanhToan ${fullDomain}`);
+  const url = `https://img.vietqr.io/image/Techcombank-${account}-compact2.png?amount=${amt}&addInfo=${addInfo}`;
+  qrImg.src = url;
+  qrImg.style.display = 'block';
+  showToast(`✅ QR tạo cho ${amt.toLocaleString()} đ`);
+}
+
+/* ========== domain RDAP check ========== */
+const checkBtnEl = document.getElementById('checkBtn');
+checkBtnEl.addEventListener('click', async ()=>{
+  const name = (domainInput.value || '').trim();
+  if(!name){ showToast('⚠️ Vui lòng nhập phần trước tên miền', false); return; }
+  const tld = tldSelect.value;
+  const full = name + tld;
+  showToast('Đang kiểm tra miền...');
+  try{
+    const res = await fetch('https://rdap.org/domain/' + encodeURIComponent(full), {mode:'cors'});
+    if(res.status === 200){
+      showToast('❌ Tên miền đã có người sở hữu', false);
+    } else if(res.status === 404){
+      showToast('✅ Tên miền khả dụng để đăng ký!');
+    } else {
+      showToast(`⚠️ Kết quả không rõ (HTTP ${res.status})`, false);
     }
-  </script>
+  } catch(err){
+    console.warn('rdap err', err);
+    showToast('⚠️ Không thể kiểm tra miền (có thể bị CORS). Báo admin để hỗ trợ proxy.', false);
+  }
+});
+
+/* accessibility: Enter triggers calc */
+domainInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); calcBtn.click(); } });
+
+/* make sure bank copy-targets have data-copy attr (in case) */
+document.querySelectorAll('.copy-target').forEach(el=>{
+  if(!el.getAttribute('data-copy')){
+    const text = el.textContent.trim();
+    el.setAttribute('data-copy', text);
+  }
+});
+</script>
 </body>
 </html>
