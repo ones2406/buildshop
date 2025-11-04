@@ -36,7 +36,11 @@
     .copyable{cursor:pointer; color:var(--accent); user-select:none}
     img.qr{width:200px; display:block; margin:14px auto; border-radius:8px}
     .benefits ul{list-style:"✨ "; padding-left:18px}
-    @media(max-width:760px){ .container{padding:20px} h1{font-size:1.4rem} }
+    /* --- sửa để checkbox API cùng hàng --- */
+    .api-inline{display:flex; align-items:center; gap:8px; margin-top:12px;}
+    .api-inline input{width:18px; height:18px; accent-color:var(--accent); cursor:pointer; margin:0}
+    .api-inline label{margin:0; cursor:pointer; font-weight:500}
+    @media(max-width:760px){ .container{padding:20px} h1{font-size:1.4rem} .api-inline{flex-wrap:wrap} }
   </style>
 </head>
 <body>
@@ -55,6 +59,10 @@
         <option value=".shop" data-price="75000">.shop - 75.000đ/năm</option>
       </select>
 
+      <!-- nút kiểm tra domain -->
+      <button id="checkDomainBtn" type="button">🔍 Kiểm tra tên miền</button>
+      <div id="checkResult" class="result" aria-live="polite" style="display:none"></div>
+
       <label for="hosting">Gói hosting:</label>
       <select id="hosting">
         <option value="8000">Gói 1 - 8.000đ/tháng</option>
@@ -63,10 +71,14 @@
         <option value="32000">Gói 4 - 32.000đ/tháng</option>
       </select>
 
-      <label style="margin-top:12px"><input id="api" type="checkbox"> Thêm API Auto Bank (35.000đ/tháng)</label>
+      <!-- checkbox API inline cùng hàng -->
+      <div class="api-inline" aria-hidden="false">
+        <input id="api" type="checkbox" />
+        <label for="api">Thêm API Auto Bank (35.000đ/tháng)</label>
+      </div>
 
-      <label>Tiền công thiết kế (cố định):</label>
-      <input value="300.000đ" readonly>
+      <label style="margin-top:12px">Tiền công thiết kế (cố định):</label>
+      <input id="designPrice" value="300.000đ" readonly>
 
       <button id="calcBtn" type="button">Tính Tổng Tiền</button>
       <div id="resultBox" class="result" aria-live="polite"></div>
@@ -104,20 +116,20 @@
       const payBtn = document.getElementById('payBtn');
       const resultBox = document.getElementById('resultBox');
       const qrImage = document.getElementById('qrImage');
+      const checkBtn = document.getElementById('checkDomainBtn');
+      const checkResult = document.getElementById('checkResult');
 
       const copyables = Array.from(document.querySelectorAll('.copyable'));
 
-      // copy fallback: tries navigator.clipboard, falls back to textarea method
+      // copy fallback
       async function copyTextToClipboard(text) {
         try {
           if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(text);
             return true;
           } else {
-            // fallback
             const ta = document.createElement('textarea');
             ta.value = text;
-            // move off-screen
             ta.style.position = 'fixed';
             ta.style.left = '-9999px';
             document.body.appendChild(ta);
@@ -133,7 +145,6 @@
         }
       }
 
-      // attach copy handlers
       copyables.forEach(el => {
         el.addEventListener('click', async () => {
           const txt = el.getAttribute('data-text') || el.textContent.trim();
@@ -143,6 +154,47 @@
         });
       });
 
+      // -- Kiểm tra tên miền (theo form mẫu)
+      checkBtn.addEventListener('click', async () => {
+        const nameEl = document.getElementById('domainName');
+        const name = nameEl.value.trim();
+        const type = document.getElementById('domainType').value; // .com, .vn, ...
+        if (!name) { alert('⚠️ Vui lòng nhập tên miền cần kiểm tra!'); nameEl && nameEl.focus(); return; }
+
+        const fullDomain = name + type;
+        checkResult.style.display = 'block';
+        checkResult.style.color = ''; checkResult.innerHTML = '⏳ Đang kiểm tra...';
+
+        try {
+          // DomainsDB hỗ trợ zone param: zone= com | vn | net | shop (không có dot)
+          const zone = type.replace('.', '');
+          const apiUrl = `https://api.domainsdb.info/v1/domains/search?domain=${encodeURIComponent(name)}&zone=${encodeURIComponent(zone)}`;
+          const res = await fetch(apiUrl);
+          const data = await res.json();
+
+          // Nếu api trả về "domains" mà có item với domain === fullDomain => đã đăng ký
+          let registered = false;
+          if (data && Array.isArray(data.domains) && data.domains.length > 0) {
+            for (const d of data.domains) {
+              if (d.domain && d.domain.toLowerCase() === fullDomain.toLowerCase()) { registered = true; break; }
+            }
+          }
+
+          if (registered) {
+            checkResult.innerHTML = `❌ <strong>${fullDomain}</strong> đã được đăng ký.`;
+            checkResult.style.color = '#ff8080';
+          } else {
+            checkResult.innerHTML = `✅ <strong>${fullDomain}</strong> có thể đăng ký!`;
+            checkResult.style.color = '#80ff80';
+          }
+        } catch (err) {
+          console.error('Domain check error', err);
+          checkResult.innerHTML = '⚠️ Không thể kiểm tra (lỗi API hoặc mạng).';
+          checkResult.style.color = '#ffd080';
+        }
+      });
+
+      // -- Tính tiền (giữ form mẫu)
       calcBtn.addEventListener('click', () => {
         try {
           const nameEl = document.getElementById('domainName');
@@ -173,28 +225,42 @@
           `;
           payBtn.style.display = 'block';
 
-          payBtn.onclick = () => {
-            // VietQR image URL (encode domain)
-            const encoded = encodeURIComponent(fullDomain);
-            const qrUrl = `https://img.vietqr.io/image/Techcombank-19073015796012-compact2.png?amount=${total}&addInfo=ThanhToan+${encoded}`;
-            qrImage.src = qrUrl;
-            qrImage.style.display = 'block';
-            qrImage.alt = 'QR Thanh Toán cho ' + fullDomain;
-            console.log('QR URL:', qrUrl);
-            setTimeout(()=> qrImage.scrollIntoView({behavior:'smooth'}), 120);
-          };
+          // lưu state để QR dùng
+          payBtn.dataset.amount = total;
+          payBtn.dataset.fulldomain = fullDomain;
         } catch (err) {
           console.error('Tính tiền lỗi:', err);
           alert('Có lỗi xảy ra khi tính tiền. Mở Console (F12) để xem chi tiết.');
         }
       });
 
-      // small helpers
+      // -- Hiển thị QR (nội dung = tên miền đầy đủ, không có "ThanhToan")
+      payBtn.addEventListener('click', () => {
+        try {
+          const amount = payBtn.dataset.amount;
+          const fullDomain = payBtn.dataset.fulldomain;
+          if (!amount || !fullDomain) { alert('⚠️ Vui lòng tính tiền trước khi hiển thị QR.'); return; }
+
+          // VietQR: dùng account Techcombank - số tài khoản bạn đã dùng trước
+          const encodedDomain = encodeURIComponent(fullDomain);
+          const qrUrl = `https://img.vietqr.io/image/Techcombank-19073015796012-compact2.png?amount=${amount}&addInfo=${encodedDomain}`;
+
+          qrImage.src = qrUrl;
+          qrImage.alt = 'QR Thanh Toán cho ' + fullDomain;
+          qrImage.style.display = 'block';
+          // scroll to QR nhẹ
+          setTimeout(()=> qrImage.scrollIntoView({behavior:'smooth'}), 120);
+        } catch (err) {
+          console.error('QR gen error', err);
+          alert('Không thể tạo QR. Xem Console để biết lỗi.');
+        }
+      });
+
+      // helpers
       function numberWithCommas(x){ return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
       function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(t){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[t]) }); }
 
-      // quick dev info
-      console.log('Invoice page ready. (Run via Live Server or http server to enable clipboard API).');
+      console.log('Invoice page ready (form gốc + tính năng domain check + QR domain-only).');
     })();
   </script>
 </body>
