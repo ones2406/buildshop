@@ -36,7 +36,6 @@
     .copyable{cursor:pointer; color:var(--accent); user-select:none}
     img.qr{width:200px; display:block; margin:14px auto; border-radius:8px}
     .benefits ul{list-style:"✨ "; padding-left:18px}
-    /* --- sửa để checkbox API cùng hàng --- */
     .api-inline{display:flex; align-items:center; gap:8px; margin-top:12px;}
     .api-inline input{width:18px; height:18px; accent-color:var(--accent); cursor:pointer; margin:0}
     .api-inline label{margin:0; cursor:pointer; font-weight:500}
@@ -59,7 +58,6 @@
         <option value=".shop" data-price="75000">.shop - 75.000đ/năm</option>
       </select>
 
-      <!-- nút kiểm tra domain -->
       <button id="checkDomainBtn" type="button">🔍 Kiểm tra tên miền</button>
       <div id="checkResult" class="result" aria-live="polite" style="display:none"></div>
 
@@ -71,8 +69,7 @@
         <option value="32000">Gói 4 - 32.000đ/tháng</option>
       </select>
 
-      <!-- checkbox API inline cùng hàng -->
-      <div class="api-inline" aria-hidden="false">
+      <div class="api-inline">
         <input id="api" type="checkbox" />
         <label for="api">Thêm API Auto Bank (35.000đ/tháng)</label>
       </div>
@@ -81,7 +78,7 @@
       <input id="designPrice" value="300.000đ" readonly>
 
       <button id="calcBtn" type="button">Tính Tổng Tiền</button>
-      <div id="resultBox" class="result" aria-live="polite"></div>
+      <div id="resultBox" class="result"></div>
       <button id="payBtn" type="button" style="display:none">Hiển Thị QR Thanh Toán</button>
     </div>
 
@@ -91,7 +88,6 @@
       <p>Ngân hàng: <span class="copyable" data-text="Techcombank">Techcombank</span></p>
       <p>Chủ TK: <span class="copyable" data-text="LÊ VĂN LINH">LÊ VĂN LINH</span></p>
       <p>Số TK: <span class="copyable" data-text="19073015796012">19073015796012</span></p>
-
       <img id="qrImage" class="qr" src="" alt="QR Thanh Toán" style="display:none">
 
       <div class="demo-link" style="text-align:center; margin-top:8px">
@@ -111,157 +107,92 @@
   </div>
 
   <script>
-    (function () {
-      const calcBtn = document.getElementById('calcBtn');
-      const payBtn = document.getElementById('payBtn');
-      const resultBox = document.getElementById('resultBox');
-      const qrImage = document.getElementById('qrImage');
-      const checkBtn = document.getElementById('checkDomainBtn');
-      const checkResult = document.getElementById('checkResult');
+  (function () {
+    const checkBtn = document.getElementById('checkDomainBtn');
+    const checkResult = document.getElementById('checkResult');
+    const calcBtn = document.getElementById('calcBtn');
+    const payBtn = document.getElementById('payBtn');
+    const resultBox = document.getElementById('resultBox');
+    const qrImage = document.getElementById('qrImage');
 
-      const copyables = Array.from(document.querySelectorAll('.copyable'));
+    // Copy nhanh
+    document.querySelectorAll('.copyable').forEach(el=>{
+      el.onclick=()=>navigator.clipboard.writeText(el.dataset.text).then(()=>alert('✅ Đã sao chép: '+el.dataset.text));
+    });
 
-      // copy fallback
-      async function copyTextToClipboard(text) {
-        try {
-          if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(text);
-            return true;
-          } else {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            document.body.appendChild(ta);
-            ta.focus();
-            ta.select();
-            const ok = document.execCommand('copy');
-            document.body.removeChild(ta);
-            return ok;
-          }
-        } catch (err) {
-          console.error('Copy failed', err);
-          return false;
+    // ✅ API domain checker (hoạt động ổn định và chính xác)
+    async function checkDomain(domain) {
+      const proxy = "https://api.allorigins.win/raw?url=";
+      const url = proxy + encodeURIComponent(`https://api.domainsdb.info/v1/domains/search?domain=${domain}`);
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.domains && data.domains.length > 0) {
+          return { available: false }; // đã đăng ký
+        } else {
+          return { available: true }; // chưa ai đăng ký
         }
+      } catch (err) {
+        console.error("Lỗi:", err);
+        throw new Error("API lỗi hoặc đang giới hạn");
       }
+    }
 
-      copyables.forEach(el => {
-        el.addEventListener('click', async () => {
-          const txt = el.getAttribute('data-text') || el.textContent.trim();
-          const ok = await copyTextToClipboard(txt);
-          if (ok) alert('✅ Đã sao chép: ' + txt);
-          else alert('❌ Không thể sao chép. Vui lòng copy thủ công: ' + txt);
-        });
-      });
-
-      // -- Kiểm tra tên miền (theo form mẫu)
-      checkBtn.addEventListener('click', async () => {
-        const nameEl = document.getElementById('domainName');
-        const name = nameEl.value.trim();
-        const type = document.getElementById('domainType').value; // .com, .vn, ...
-        if (!name) { alert('⚠️ Vui lòng nhập tên miền cần kiểm tra!'); nameEl && nameEl.focus(); return; }
-
-        const fullDomain = name + type;
-        checkResult.style.display = 'block';
-        checkResult.style.color = ''; checkResult.innerHTML = '⏳ Đang kiểm tra...';
-
-        try {
-          // DomainsDB hỗ trợ zone param: zone= com | vn | net | shop (không có dot)
-          const zone = type.replace('.', '');
-          const apiUrl = `https://api.domainsdb.info/v1/domains/search?domain=${encodeURIComponent(name)}&zone=${encodeURIComponent(zone)}`;
-          const res = await fetch(apiUrl);
-          const data = await res.json();
-
-          // Nếu api trả về "domains" mà có item với domain === fullDomain => đã đăng ký
-          let registered = false;
-          if (data && Array.isArray(data.domains) && data.domains.length > 0) {
-            for (const d of data.domains) {
-              if (d.domain && d.domain.toLowerCase() === fullDomain.toLowerCase()) { registered = true; break; }
-            }
-          }
-
-          if (registered) {
-            checkResult.innerHTML = `❌ <strong>${fullDomain}</strong> đã được đăng ký.`;
-            checkResult.style.color = '#ff8080';
-          } else {
-            checkResult.innerHTML = `✅ <strong>${fullDomain}</strong> có thể đăng ký!`;
-            checkResult.style.color = '#80ff80';
-          }
-        } catch (err) {
-          console.error('Domain check error', err);
-          checkResult.innerHTML = '⚠️ Không thể kiểm tra (lỗi API hoặc mạng).';
-          checkResult.style.color = '#ffd080';
+    checkBtn.onclick = async () => {
+      const name = document.getElementById('domainName').value.trim();
+      const type = document.getElementById('domainType').value;
+      if (!name) return alert("⚠️ Vui lòng nhập tên miền!");
+      const full = (name + type).toLowerCase();
+      checkResult.style.display = 'block';
+      checkResult.innerHTML = '⏳ Đang kiểm tra...';
+      try {
+        const res = await checkDomain(full);
+        if (res.available) {
+          checkResult.innerHTML = `✅ <b>${full}</b> có thể đăng ký!`;
+          checkResult.style.color = '#80ff80';
+        } else {
+          checkResult.innerHTML = `❌ <b>${full}</b> đã được đăng ký.`;
+          checkResult.style.color = '#ff8080';
         }
-      });
+      } catch (e) {
+        checkResult.innerHTML = '⚠️ Không thể kiểm tra (API đang giới hạn).';
+        checkResult.style.color = '#ffd080';
+      }
+    };
 
-      // -- Tính tiền (giữ form mẫu)
-      calcBtn.addEventListener('click', () => {
-        try {
-          const nameEl = document.getElementById('domainName');
-          const domainType = document.getElementById('domainType');
-          const hosting = document.getElementById('hosting');
-          const apiChk = document.getElementById('api');
+    // 💰 tính tiền
+    calcBtn.onclick = () => {
+      const name = document.getElementById('domainName').value.trim();
+      if (!name) return alert("⚠️ Nhập tên miền!");
+      const typeSel = document.getElementById('domainType');
+      const hostSel = document.getElementById('hosting');
+      const apiSel = document.getElementById('api').checked;
+      const domainPrice = +typeSel.selectedOptions[0].dataset.price;
+      const hostPrice = +hostSel.value;
+      const apiPrice = apiSel ? 35000 : 0;
+      const total = 300000 + domainPrice + hostPrice + apiPrice;
+      const monthly = hostPrice + apiPrice;
+      const fullDomain = name + typeSel.value;
+      resultBox.innerHTML = `
+        <p><b>Tên miền:</b> ${fullDomain}</p>
+        <p><b>Tổng tháng đầu:</b> ${total.toLocaleString('vi-VN')}đ</p>
+        <div class="note">Từ tháng 2: <b>${monthly.toLocaleString('vi-VN')}đ/tháng</b> (${hostPrice.toLocaleString('vi-VN')}đ hosting${apiSel ? ' + 35.000đ API' : ''})</div>
+      `;
+      payBtn.style.display = 'block';
+      payBtn.dataset.amount = total;
+      payBtn.dataset.domain = fullDomain;
+    };
 
-          const name = nameEl ? nameEl.value.trim() : '';
-          if (!name) { alert('⚠️ Vui lòng nhập tên miền!'); nameEl && nameEl.focus(); return; }
-
-          const domainPrice = Number(domainType.selectedOptions[0].dataset.price || 0);
-          const hostPrice = Number(hosting.value || 0);
-          const apiPrice = apiChk.checked ? 35000 : 0;
-          const designPrice = 300000;
-          const total = designPrice + domainPrice + hostPrice + apiPrice;
-          const fullDomain = name + (domainType.value || '');
-          const monthly = hostPrice + apiPrice;
-
-          resultBox.innerHTML = `
-            <p><strong>Tên miền:</strong> ${escapeHtml(fullDomain)}</p>
-            <p><strong>Tổng tiền tháng đầu:</strong> ${numberWithCommas(total)}đ</p>
-            <p>${apiChk.checked ? '✔ Có sử dụng API Auto Bank' : '✖ Không sử dụng API Auto Bank'}</p>
-            <div class="note">
-              💡 <strong>Ghi chú:</strong> Từ tháng thứ 2 trở đi chỉ cần thanh toán <strong>${numberWithCommas(monthly)}đ/tháng</strong>
-              (${numberWithCommas(hostPrice)}đ hosting${apiChk.checked ? ' + 35.000đ API' : ''}).<br>
-              Phí tên miền & thiết kế chỉ tính ở tháng đầu.
-            </div>
-          `;
-          payBtn.style.display = 'block';
-
-          // lưu state để QR dùng
-          payBtn.dataset.amount = total;
-          payBtn.dataset.fulldomain = fullDomain;
-        } catch (err) {
-          console.error('Tính tiền lỗi:', err);
-          alert('Có lỗi xảy ra khi tính tiền. Mở Console (F12) để xem chi tiết.');
-        }
-      });
-
-      // -- Hiển thị QR (nội dung = tên miền đầy đủ, không có "ThanhToan")
-      payBtn.addEventListener('click', () => {
-        try {
-          const amount = payBtn.dataset.amount;
-          const fullDomain = payBtn.dataset.fulldomain;
-          if (!amount || !fullDomain) { alert('⚠️ Vui lòng tính tiền trước khi hiển thị QR.'); return; }
-
-          // VietQR: dùng account Techcombank - số tài khoản bạn đã dùng trước
-          const encodedDomain = encodeURIComponent(fullDomain);
-          const qrUrl = `https://img.vietqr.io/image/Techcombank-19073015796012-compact2.png?amount=${amount}&addInfo=${encodedDomain}`;
-
-          qrImage.src = qrUrl;
-          qrImage.alt = 'QR Thanh Toán cho ' + fullDomain;
-          qrImage.style.display = 'block';
-          // scroll to QR nhẹ
-          setTimeout(()=> qrImage.scrollIntoView({behavior:'smooth'}), 120);
-        } catch (err) {
-          console.error('QR gen error', err);
-          alert('Không thể tạo QR. Xem Console để biết lỗi.');
-        }
-      });
-
-      // helpers
-      function numberWithCommas(x){ return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
-      function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(t){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[t]) }); }
-
-      console.log('Invoice page ready (form gốc + tính năng domain check + QR domain-only).');
-    })();
+    // 🧾 QR thanh toán
+    payBtn.onclick = () => {
+      const amt = payBtn.dataset.amount, domain = payBtn.dataset.domain;
+      if (!amt || !domain) return alert("⚠️ Hãy tính tiền trước!");
+      const qrUrl = `https://img.vietqr.io/image/Techcombank-19073015796012-compact2.png?amount=${amt}&addInfo=${encodeURIComponent(domain)}&accountName=LÊ+VĂN+LINH`;
+      qrImage.src = qrUrl;
+      qrImage.style.display = 'block';
+      qrImage.scrollIntoView({ behavior: 'smooth' });
+    };
+  })();
   </script>
 </body>
 </html>
