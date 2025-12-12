@@ -6,8 +6,14 @@
   <title>Báo Giá Website - Cypher</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    :root { --accent: #00ffff; --text-light: #f5f5f5; }
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; transition: all 0.25s ease; }
+    :root { 
+      --accent: #00ffff; 
+      --text-light: #f5f5f5; 
+      --bg-dark: #141414;
+      --bg-card: rgba(8,8,8,0.9);
+      --bg-options: #1e1e1e;
+    }
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; transition: all 0.2s ease; }
     body{
       margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
       background: linear-gradient(120deg,#000,#0a0020,#001a33,#001a00);
@@ -17,20 +23,112 @@
     @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
     .container{
       width:90%; max-width:1100px; display:flex; gap:36px; flex-wrap:wrap;
-      padding:32px; border-radius:20px; background:rgba(8,8,8,0.9);
+      padding:32px; border-radius:20px; background:var(--bg-card);
       border:1px solid rgba(0,255,255,0.08); box-shadow:0 8px 30px rgba(0,0,0,0.6);
       backdrop-filter: blur(6px);
     }
     .column{flex:1; min-width:300px; max-width:480px;}
     h1{color:var(--accent); text-align:center; margin:0 0 18px 0; text-shadow:0 0 8px rgba(0,255,255,0.12)}
     label{display:block; margin-top:10px; font-weight:500;}
-    input,select{width:100%; padding:10px; border-radius:8px; background:#141414; color:#fff; border:1px solid #222; outline:none}
-    input:focus,select:focus{box-shadow:0 0 8px rgba(0,255,255,0.12); border-color:var(--accent)}
+    
+    /* ------------------------------------- */
+    /* CSS cho Custom Select Box */
+    /* ------------------------------------- */
+    .custom-select-wrapper {
+      position: relative;
+      user-select: none;
+      width: 100%;
+      margin-top: 5px;
+      margin-bottom: 10px; /* Thêm khoảng cách nếu cần */
+    }
+    .select-styled {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--bg-dark);
+      color: #fff;
+      border: 1px solid #222;
+      cursor: pointer;
+      outline: none;
+      position: relative;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease; 
+    }
+    .select-styled:after {
+      content: '▼';
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--accent);
+      transition: transform 0.2s ease;
+    }
+    .select-styled.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(0,255,255,0.25);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    .select-styled.active:after {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    .select-options {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      background: var(--bg-options);
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+      
+      /* Hiệu ứng trượt và mờ */
+      max-height: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: max-height 0.3s ease-out, opacity 0.3s ease-out, visibility 0.3s ease-out;
+    }
+    .select-options.active {
+      max-height: 250px; 
+      opacity: 1;
+      visibility: visible;
+    }
+    .select-options li {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+    .select-options li:hover {
+      background: rgba(0,255,255,0.1);
+      color: var(--accent);
+    }
+    .select-options li:last-child {
+      border-bottom: none;
+    }
+    /* ------------------------------------- */
+
+    /* Các phần tử input còn lại */
+    input {
+      width:100%; padding:10px; border-radius:8px; background:var(--bg-dark); color:#fff; 
+      border:1px solid #222; outline:none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    input:focus{box-shadow:0 0 10px rgba(0,255,255,0.25); border-color:var(--accent)}
     input[readonly]{background:#222; color:#ccc}
-    button{width:100%; margin-top:16px; padding:12px; border-radius:10px; border:none;
+    button{
+      width:100%; margin-top:16px; padding:12px; border-radius:10px; border:none;
       background:linear-gradient(90deg,#00ffff,#0077ff); color:#000; font-weight:600; cursor:pointer;
-      box-shadow:0 6px 18px rgba(0,255,255,0.12)}
-    button:hover{transform:translateY(-2px)}
+      box-shadow:0 6px 18px rgba(0,255,255,0.12);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    button:hover{transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,255,255,0.25);} 
+    /* ... (Phần CSS khác giữ nguyên) ... */
     .result{margin-top:14px; padding:12px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid rgba(255,255,255,0.04)}
     .note{margin-top:10px; padding:8px 10px; border-left:3px solid var(--accent); background:rgba(0,255,255,0.03); color:#dff;}
     .copyable{cursor:pointer; color:var(--accent); user-select:none}
@@ -51,24 +149,32 @@
       <input id="domainName" type="text" placeholder="Nhập tên miền (vd: cypher234)">
 
       <label for="domainType">Chọn đuôi miền:</label>
-      <select id="domainType">
-        <option value=".com" data-price="250000">.com - 250.000đ/năm</option>
-        <option value=".vn" data-price="480000">.vn - 480.000đ/năm</option>
-        <option value=".net" data-price="260000">.net - 260.000đ/năm</option>
-        <option value=".shop" data-price="75000">.shop - 75.000đ/năm</option>
-      </select>
-
+      <div class="custom-select-wrapper">
+        <div id="domainTypeStyled" class="select-styled" data-value=".com" data-price="250000">
+          .com - 250.000đ/năm
+        </div>
+        <ul id="domainTypeOptions" class="select-options">
+          <li data-value=".com" data-price="250000">.com - 250.000đ/năm</li>
+          <li data-value=".vn" data-price="480000">.vn - 480.000đ/năm</li>
+          <li data-value=".net" data-price="260000">.net - 260.000đ/năm</li>
+          <li data-value=".shop" data-price="75000">.shop - 75.000đ/năm</li>
+        </ul>
+        <input type="hidden" id="domainType" value=".com" data-price="250000"> </div>
       <button id="checkDomainBtn" type="button">🔍 Kiểm tra tên miền</button>
       <div id="checkResult" class="result" aria-live="polite" style="display:none"></div>
 
       <label for="hosting">Gói hosting:</label>
-      <select id="hosting">
-        <option value="8000">Gói 1 - 8.000đ/tháng(mới mở nên dùng )</option>
-        <option value="16000">Gói 2 - 16.000đ/tháng( web vừa tầm trung )</option>
-        <option value="24000">Gói 3 - 24.000đ/tháng</option>
-        <option value="32000">Gói 4 - 32.000đ/tháng</option>
-      </select>
-
+      <div class="custom-select-wrapper">
+        <div id="hostingStyled" class="select-styled" data-value="8000">
+          Gói 1 - 8.000đ/tháng(mới mở nên dùng )
+        </div>
+        <ul id="hostingOptions" class="select-options">
+          <li data-value="8000">Gói 1 - 8.000đ/tháng(mới mở nên dùng )</li>
+          <li data-value="16000">Gói 2 - 16.000đ/tháng( web vừa tầm trung )</li>
+          <li data-value="24000">Gói 3 - 24.000đ/tháng</li>
+          <li data-value="32000">Gói 4 - 32.000đ/tháng</li>
+        </ul>
+        <input type="hidden" id="hosting" value="8000"> </div>
       <div class="api-inline">
         <input id="api" type="checkbox" />
         <label for="api">Thêm API Auto Bank (35.000đ/tháng)</label>
@@ -114,11 +220,78 @@
     const payBtn = document.getElementById('payBtn');
     const resultBox = document.getElementById('resultBox');
     const qrImage = document.getElementById('qrImage');
+    
+    // Custom Select Elements
+    const domainTypeStyled = document.getElementById('domainTypeStyled');
+    const domainTypeOptions = document.getElementById('domainTypeOptions');
+    const domainTypeHidden = document.getElementById('domainType'); 
+
+    const hostingStyled = document.getElementById('hostingStyled');
+    const hostingOptions = document.getElementById('hostingOptions');
+    const hostingHidden = document.getElementById('hosting');
+    
 
     // Copy nhanh
     document.querySelectorAll('.copyable').forEach(el=>{
       el.onclick=()=>navigator.clipboard.writeText(el.dataset.text).then(()=>alert('✅ Đã sao chép: '+el.dataset.text));
     });
+
+    // -------------------------------------
+    // Hàm xử lý chung cho Custom Select
+    // -------------------------------------
+    function setupCustomSelect(styledEl, optionsEl, hiddenInput) {
+        // Mở/Đóng danh sách tùy chỉnh
+        styledEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Đóng tất cả các danh sách khác trước khi mở danh sách hiện tại
+            document.querySelectorAll('.select-styled.active').forEach(el => {
+                if (el !== styledEl) el.classList.remove('active');
+            });
+            document.querySelectorAll('.select-options.active').forEach(el => {
+                if (el !== optionsEl) el.classList.remove('active');
+            });
+
+            styledEl.classList.toggle('active');
+            optionsEl.classList.toggle('active');
+        });
+
+        // Xử lý chọn option
+        optionsEl.querySelectorAll('li').forEach(option => {
+            option.addEventListener('click', function(e) {
+                // 1. Cập nhật giá trị hiển thị
+                styledEl.textContent = this.textContent;
+                styledEl.dataset.value = this.dataset.value;
+                if (this.dataset.price) styledEl.dataset.price = this.dataset.price;
+                
+                // 2. Cập nhật giá trị input ẩn (để hàm tính toán sử dụng)
+                hiddenInput.value = this.dataset.value;
+                if (this.dataset.price) hiddenInput.dataset.price = this.dataset.price;
+
+                // 3. Đóng danh sách
+                styledEl.classList.remove('active');
+                optionsEl.classList.remove('active');
+                
+                e.stopPropagation(); 
+            });
+        });
+    }
+
+    // Áp dụng cho Domain Type
+    setupCustomSelect(domainTypeStyled, domainTypeOptions, domainTypeHidden);
+    
+    // Áp dụng cho Hosting
+    setupCustomSelect(hostingStyled, hostingOptions, hostingHidden);
+
+    // Đóng danh sách nếu click ra ngoài
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.select-styled.active').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.querySelectorAll('.select-options.active').forEach(el => {
+            el.classList.remove('active');
+        });
+    });
+    // -------------------------------------
 
     // ✅ API domain checker (hoạt động ổn định và chính xác)
     async function checkDomain(domain) {
@@ -140,7 +313,8 @@
 
     checkBtn.onclick = async () => {
       const name = document.getElementById('domainName').value.trim();
-      const type = document.getElementById('domainType').value;
+      // Lấy giá trị từ input ẩn Domain
+      const type = domainTypeHidden.value; 
       if (!name) return alert("⚠️ Vui lòng nhập tên miền!");
       const full = (name + type).toLowerCase();
       checkResult.style.display = 'block';
@@ -164,22 +338,33 @@
     calcBtn.onclick = () => {
       const name = document.getElementById('domainName').value.trim();
       if (!name) return alert("⚠️ Nhập tên miền!");
-      const typeSel = document.getElementById('domainType');
-      const hostSel = document.getElementById('hosting');
+      
+      // Lấy giá trị từ input ẩn Domain
+      const domainPrice = +domainTypeHidden.dataset.price;
+      const domainValue = domainTypeHidden.value;
+
+      // Lấy giá trị từ input ẩn Hosting
+      const hostPrice = +hostingHidden.value; 
+
       const apiSel = document.getElementById('api').checked;
-      const domainPrice = +typeSel.selectedOptions[0].dataset.price;
-      const hostPrice = +hostSel.value;
       const apiPrice = apiSel ? 35000 : 0;
-      const total = 300000 + domainPrice + hostPrice + apiPrice;
+      
+      const designPrice = 300000; 
+      const totalFirstMonth = designPrice + domainPrice + hostPrice + apiPrice;
       const monthly = hostPrice + apiPrice;
-      const fullDomain = name + typeSel.value;
+
+      const fullDomain = name + domainValue;
       resultBox.innerHTML = `
         <p><b>Tên miền:</b> ${fullDomain}</p>
-        <p><b>Tổng tháng đầu:</b> ${total.toLocaleString('vi-VN')}đ</p>
-        <div class="note">Từ tháng 2: <b>${monthly.toLocaleString('vi-VN')}đ/tháng</b> (${hostPrice.toLocaleString('vi-VN')}đ hosting${apiSel ? ' + 35.000đ API' : ''})</div>
+        <p><b>Tổng tháng đầu:</b> ${totalFirstMonth.toLocaleString('vi-VN')}đ</p>
+        <div class="note">
+          Từ tháng 2: <b>${monthly.toLocaleString('vi-VN')}đ/tháng</b> 
+          (${hostPrice.toLocaleString('vi-VN')}đ hosting${apiSel ? ' + 35.000đ API' : ''}). 
+          Tên miền gia hạn hàng năm.
+        </div>
       `;
       payBtn.style.display = 'block';
-      payBtn.dataset.amount = total;
+      payBtn.dataset.amount = totalFirstMonth; 
       payBtn.dataset.domain = fullDomain;
     };
 
